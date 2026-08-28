@@ -25,9 +25,14 @@ class AccountingService:
     def __init__(self, session_factory: Callable[[], Session]) -> None:
         self._session_factory = session_factory
 
-    def list_transactions(self) -> list[Transaction]:
+    def list_transactions(
+        self,
+        keyword: str = "",
+        start_date: date | None = None,
+        end_date: date | None = None,
+    ) -> list[Transaction]:
         with self._session_factory() as session:
-            return TransactionRepository.list_all(session)
+            return TransactionRepository.list_all(session, keyword, start_date, end_date)
 
     def list_categories(self, transaction_type: str) -> list[Category]:
         self._validate_type(transaction_type)
@@ -72,8 +77,13 @@ class AccountingService:
             TransactionRepository.delete(session, transaction)
             return True
 
-    def get_summary(self) -> tuple[int, int, int]:
-        transactions = self.list_transactions()
+    def get_summary(
+        self,
+        keyword: str = "",
+        start_date: date | None = None,
+        end_date: date | None = None,
+    ) -> tuple[int, int, int]:
+        transactions = self.list_transactions(keyword, start_date, end_date)
         total_income = sum(item.amount for item in transactions if item.type == "income")
         total_expense = sum(item.amount for item in transactions if item.type == "expense")
         return total_income, total_expense, total_income - total_expense

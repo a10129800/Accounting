@@ -1,6 +1,6 @@
 from datetime import date
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session, joinedload
 
 from .models import Category, Transaction
@@ -15,12 +15,26 @@ class CategoryRepository:
 
 class TransactionRepository:
     @staticmethod
-    def list_all(session: Session) -> list[Transaction]:
+    def list_all(
+        session: Session,
+        keyword: str = "",
+        start_date: date | None = None,
+        end_date: date | None = None,
+    ) -> list[Transaction]:
         statement = (
             select(Transaction)
             .options(joinedload(Transaction.category))
             .order_by(Transaction.transaction_date.desc(), Transaction.id.desc())
         )
+        if keyword:
+            pattern = f"%{keyword}%"
+            statement = statement.join(Transaction.category).where(
+                or_(Transaction.note.like(pattern), Category.name.like(pattern))
+            )
+        if start_date is not None:
+            statement = statement.where(Transaction.transaction_date >= start_date)
+        if end_date is not None:
+            statement = statement.where(Transaction.transaction_date <= end_date)
         return list(session.scalars(statement))
 
     @staticmethod

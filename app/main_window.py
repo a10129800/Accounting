@@ -1,8 +1,12 @@
+from datetime import date
+
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QMainWindow,
     QMessageBox,
+    QDateEdit,
+    QLineEdit,
     QPushButton,
     QVBoxLayout,
     QWidget,
@@ -28,6 +32,27 @@ class MainWindow(QMainWindow):
         summary_layout.addWidget(self.expense_label)
         summary_layout.addWidget(self.balance_label)
 
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("搜尋分類或備註")
+        self.start_date_input = QDateEdit()
+        self.start_date_input.setCalendarPopup(True)
+        self.start_date_input.setDate(date(1900, 1, 1))
+        self.end_date_input = QDateEdit()
+        self.end_date_input.setCalendarPopup(True)
+        self.end_date_input.setDate(date(2100, 12, 31))
+        clear_filter_button = QPushButton("清除篩選")
+        self.search_input.textChanged.connect(self.refresh)
+        self.start_date_input.dateChanged.connect(self.refresh)
+        self.end_date_input.dateChanged.connect(self.refresh)
+        clear_filter_button.clicked.connect(self.clear_filters)
+        filter_layout = QHBoxLayout()
+        filter_layout.addWidget(self.search_input)
+        filter_layout.addWidget(QLabel("從"))
+        filter_layout.addWidget(self.start_date_input)
+        filter_layout.addWidget(QLabel("至"))
+        filter_layout.addWidget(self.end_date_input)
+        filter_layout.addWidget(clear_filter_button)
+
         self.table = TransactionTable()
 
         income_button = QPushButton("新增收入")
@@ -47,6 +72,7 @@ class MainWindow(QMainWindow):
 
         layout = QVBoxLayout()
         layout.addLayout(summary_layout)
+        layout.addLayout(filter_layout)
         layout.addWidget(self.table)
         layout.addLayout(action_layout)
         container = QWidget()
@@ -55,11 +81,23 @@ class MainWindow(QMainWindow):
         self.refresh()
 
     def refresh(self) -> None:
-        self.table.transaction_model.set_transactions(self.service.list_transactions())
-        total_income, total_expense, balance = self.service.get_summary()
+        keyword = self.search_input.text().strip()
+        start_date = self.start_date_input.date().toPython()
+        end_date = self.end_date_input.date().toPython()
+        self.table.transaction_model.set_transactions(
+            self.service.list_transactions(keyword, start_date, end_date)
+        )
+        total_income, total_expense, balance = self.service.get_summary(
+            keyword, start_date, end_date
+        )
         self.income_label.setText(f"總收入：{total_income:,} 元")
         self.expense_label.setText(f"總支出：{total_expense:,} 元")
         self.balance_label.setText(f"餘額：{balance:,} 元")
+
+    def clear_filters(self) -> None:
+        self.search_input.clear()
+        self.start_date_input.setDate(date(1900, 1, 1))
+        self.end_date_input.setDate(date(2100, 12, 31))
 
     def add_transaction(self, transaction_type: str) -> None:
         categories = self.service.list_categories(transaction_type)

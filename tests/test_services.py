@@ -97,3 +97,14 @@ def test_category_type_must_match_transaction(service):
 
     with pytest.raises(ValidationError, match="交易類型與分類不一致"):
         service.add_transaction(transaction_input(service, 100, "expense", ids["薪資"]))
+
+
+def test_search_and_date_filter(service):
+    ids = category_ids(service)
+    service.add_transaction(transaction_input(service, 50000, "income", ids["薪資"], "八月薪資"))
+    service.add_transaction(transaction_input(service, 120, "expense", ids["餐飲"], "午餐"))
+
+    assert len(service.list_transactions(keyword="薪資")) == 1
+    assert len(service.list_transactions(keyword="午餐")) == 1
+    assert len(service.list_transactions(start_date=date(2026, 8, 28), end_date=date(2026, 8, 28))) == 2
+    assert service.get_summary(keyword="薪資") == (50000, 0, 50000)
