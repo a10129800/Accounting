@@ -77,6 +77,46 @@ class AccountingService:
             TransactionRepository.delete(session, transaction)
             return True
 
+    def list_all_categories(self) -> list[Category]:
+        with self._session_factory() as session:
+            return CategoryRepository.list_all(session)
+
+    def add_category(self, name: str, category_type: str) -> Category:
+        name = name.strip()
+        if not name:
+            raise ValidationError("分類名稱不能為空")
+        self._validate_type(category_type)
+        with self._session_factory.begin() as session:
+            existing = [c for c in CategoryRepository.list_by_type(session, category_type) if c.name == name]
+            if existing:
+                raise ValidationError(f"分類 '{name}' 已存在")
+            return CategoryRepository.add(session, name, category_type)
+
+    def update_category(self, category_id: int, name: str) -> bool:
+        name = name.strip()
+        if not name:
+            raise ValidationError("分類名稱不能為空")
+        with self._session_factory.begin() as session:
+            category = CategoryRepository.get_by_id(session, category_id)
+            if category is None:
+                return False
+            existing = [c for c in CategoryRepository.list_by_type(session, category.type) if c.name == name and c.id != category_id]
+            if existing:
+                raise ValidationError(f"分類 '{name}' 已存在")
+            CategoryRepository.update(category, name)
+            return True
+
+    def delete_category(self, category_id: int) -> bool:
+        with self._session_factory.begin() as session:
+            category = CategoryRepository.get_by_id(session, category_id)
+            if category is None:
+                return False
+            transaction_count = CategoryRepository.count_transactions(session, category_id)
+            if transaction_count > 0:
+                raise ValidationError(f"無法刪除分類：已有 {transaction_count} 筆交易使用此分類")
+            CategoryRepository.delete(session, category)
+            return True
+
     def get_summary(
         self,
         keyword: str = "",

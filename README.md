@@ -9,7 +9,9 @@ A simple desktop accounting application built with Python, PySide6, SQLAlchemy, 
 - 新增收入與支出 / Add income and expense transactions
 - 編輯交易 / Edit transactions
 - 刪除交易 / Delete transactions
-- 收入與支出分類 / Income and expense categories
+- 新增自訂分類 / Add custom categories
+- 編輯分類 / Edit categories
+- 刪除未使用的分類 / Delete unused categories
 - 記錄日期與備註 / Record transaction date and notes
 - 顯示交易紀錄 / Display transaction history
 - 依分類或備註搜尋交易 / Search transactions by category or note
@@ -170,7 +172,6 @@ The current module boundaries can be extended with:
 - 預算管理 / Budget management
 - Excel 匯出 / Excel export
 - 資料庫備份與還原 / Database backup and restore
-- 分類管理 / Category management
 
 ## License / 授權
 

@@ -108,3 +108,39 @@ def test_search_and_date_filter(service):
     assert len(service.list_transactions(keyword="午餐")) == 1
     assert len(service.list_transactions(start_date=date(2026, 8, 28), end_date=date(2026, 8, 28))) == 2
     assert service.get_summary(keyword="薪資") == (50000, 0, 50000)
+
+
+def test_add_custom_category(service):
+    category = service.add_category("房租", "expense")
+    assert category.name == "房租"
+    assert category.type == "expense"
+    categories = service.list_categories("expense")
+    assert any(c.name == "房租" for c in categories)
+
+
+def test_duplicate_category_name(service):
+    service.add_category("房租", "expense")
+    with pytest.raises(ValidationError, match="分類 '房租' 已存在"):
+        service.add_category("房租", "expense")
+
+
+def test_update_category(service):
+    category = service.add_category("房屋", "expense")
+    assert service.update_category(category.id, "房租")
+    categories = service.list_categories("expense")
+    assert any(c.name == "房租" for c in categories)
+
+
+def test_delete_category_without_transactions(service):
+    category = service.add_category("測試分類", "expense")
+    assert service.delete_category(category.id)
+    categories = service.list_categories("expense")
+    assert not any(c.name == "測試分類" for c in categories)
+
+
+def test_cannot_delete_category_with_transactions(service):
+    ids = category_ids(service)
+    service.add_transaction(transaction_input(service, 100, "expense", ids["餐飲"]))
+    
+    with pytest.raises(ValidationError, match="無法刪除分類"):
+        service.delete_category(ids["餐飲"])

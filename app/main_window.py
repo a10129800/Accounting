@@ -15,6 +15,7 @@ from PySide6.QtWidgets import (
 from .services import AccountingService, ValidationError
 from .transaction_dialog import TransactionDialog
 from .transaction_table import TransactionTable
+from .category_manager_dialog import CategoryManagerDialog
 
 
 class MainWindow(QMainWindow):
@@ -59,16 +60,19 @@ class MainWindow(QMainWindow):
         expense_button = QPushButton("新增支出")
         edit_button = QPushButton("編輯")
         delete_button = QPushButton("刪除")
+        category_button = QPushButton("分類管理")
         income_button.clicked.connect(lambda: self.add_transaction("income"))
         expense_button.clicked.connect(lambda: self.add_transaction("expense"))
         edit_button.clicked.connect(self.edit_transaction)
         delete_button.clicked.connect(self.delete_transaction)
+        category_button.clicked.connect(self.manage_categories)
 
         action_layout = QHBoxLayout()
         action_layout.addWidget(income_button)
         action_layout.addWidget(expense_button)
         action_layout.addWidget(edit_button)
         action_layout.addWidget(delete_button)
+        action_layout.addWidget(category_button)
 
         layout = QVBoxLayout()
         layout.addLayout(summary_layout)
@@ -133,4 +137,9 @@ class MainWindow(QMainWindow):
         answer = QMessageBox.question(self, "確認刪除", "確定要刪除選取的交易嗎？")
         if answer == QMessageBox.StandardButton.Yes:
             self.service.delete_transaction(transaction.id)
+            self.refresh()
+
+    def manage_categories(self) -> None:
+        dialog = CategoryManagerDialog(self.service, self)
+        if dialog.exec():
             self.refresh()
