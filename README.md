@@ -1,5 +1,4 @@
 # My Accounting App
-![](https://github.com/a10129800/Accounting/blob/master/img/2026-08-15%2021%2003%2044.png)
 ![](https://github.com/a10129800/Accounting/blob/master/img/2026-08-29%2017%2047%2059.png)
 一個使用 Python、PySide6、SQLAlchemy 與 SQLite 建立的簡易桌面記帳軟體。
 
