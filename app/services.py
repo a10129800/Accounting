@@ -139,6 +139,47 @@ class AccountingService:
         if transaction_type not in {"income", "expense"}:
             raise ValidationError("無效的交易類型")
 
+    def get_monthly_statistics(self) -> list[tuple[int, int, int, int, int]]:
+        """Return list of (year, month, income, expense, balance) sorted by date descending."""
+        from datetime import datetime
+        from collections import defaultdict
+        
+        transactions = self.list_transactions()
+        monthly_data = defaultdict(lambda: {"income": 0, "expense": 0})
+        
+        for txn in transactions:
+            year = txn.transaction_date.year
+            month = txn.transaction_date.month
+            key = (year, month)
+            if txn.type == "income":
+                monthly_data[key]["income"] += txn.amount
+            else:
+                monthly_data[key]["expense"] += txn.amount
+        
+        result = []
+        for (year, month), amounts in sorted(monthly_data.items(), reverse=True):
+            income = amounts["income"]
+            expense = amounts["expense"]
+            balance = income - expense
+            result.append((year, month, income, expense, balance))
+        return result
+
+    def get_category_statistics(self) -> dict[str, dict[str, int]]:
+        """Return dict of {category_name: {income: amount, expense: amount}}."""
+        from collections import defaultdict
+        
+        transactions = self.list_transactions()
+        stats = defaultdict(lambda: {"income": 0, "expense": 0})
+        
+        for txn in transactions:
+            category_name = txn.category.name
+            if txn.type == "income":
+                stats[category_name]["income"] += txn.amount
+            else:
+                stats[category_name]["expense"] += txn.amount
+        
+        return dict(stats)
+
     @staticmethod
     def _validate_category(session: Session, data: TransactionInput) -> None:
         category = session.get(Category, data.category_id)

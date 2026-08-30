@@ -144,3 +144,31 @@ def test_cannot_delete_category_with_transactions(service):
     
     with pytest.raises(ValidationError, match="無法刪除分類"):
         service.delete_category(ids["餐飲"])
+
+
+def test_monthly_statistics(service):
+    ids = category_ids(service)
+    service.add_transaction(transaction_input(service, 50000, "income", ids["薪資"]))
+    service.add_transaction(transaction_input(service, 120, "expense", ids["餐飲"]))
+    
+    monthly = service.get_monthly_statistics()
+    assert len(monthly) >= 1
+    year, month, income, expense, balance = monthly[0]
+    assert income == 50000
+    assert expense == 120
+    assert balance == 49880
+
+
+def test_category_statistics(service):
+    ids = category_ids(service)
+    service.add_transaction(transaction_input(service, 50000, "income", ids["薪資"]))
+    service.add_transaction(transaction_input(service, 120, "expense", ids["餐飲"]))
+    service.add_transaction(transaction_input(service, 80, "expense", ids["餐飲"]))
+    
+    category_stats = service.get_category_statistics()
+    assert "薪資" in category_stats
+    assert "餐飲" in category_stats
+    assert category_stats["薪資"]["income"] == 50000
+    assert category_stats["薪資"]["expense"] == 0
+    assert category_stats["餐飲"]["income"] == 0
+    assert category_stats["餐飲"]["expense"] == 200

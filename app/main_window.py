@@ -16,6 +16,7 @@ from .services import AccountingService, ValidationError
 from .transaction_dialog import TransactionDialog
 from .transaction_table import TransactionTable
 from .category_manager_dialog import CategoryManagerDialog
+from .statistics_dialog import StatisticsDialog
 
 
 class MainWindow(QMainWindow):
@@ -61,11 +62,13 @@ class MainWindow(QMainWindow):
         edit_button = QPushButton("編輯")
         delete_button = QPushButton("刪除")
         category_button = QPushButton("分類管理")
+        statistics_button = QPushButton("統計")
         income_button.clicked.connect(lambda: self.add_transaction("income"))
         expense_button.clicked.connect(lambda: self.add_transaction("expense"))
         edit_button.clicked.connect(self.edit_transaction)
         delete_button.clicked.connect(self.delete_transaction)
         category_button.clicked.connect(self.manage_categories)
+        statistics_button.clicked.connect(self.show_statistics)
 
         action_layout = QHBoxLayout()
         action_layout.addWidget(income_button)
@@ -73,6 +76,7 @@ class MainWindow(QMainWindow):
         action_layout.addWidget(edit_button)
         action_layout.addWidget(delete_button)
         action_layout.addWidget(category_button)
+        action_layout.addWidget(statistics_button)
 
         layout = QVBoxLayout()
         layout.addLayout(summary_layout)
@@ -143,3 +147,7 @@ class MainWindow(QMainWindow):
         dialog = CategoryManagerDialog(self.service, self)
         if dialog.exec():
             self.refresh()
+
+    def show_statistics(self) -> None:
+        dialog = StatisticsDialog(self.service, self)
+        dialog.exec()

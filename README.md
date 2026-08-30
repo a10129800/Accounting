@@ -16,6 +16,8 @@ A simple desktop accounting application built with Python, PySide6, SQLAlchemy, 
 - 顯示交易紀錄 / Display transaction history
 - 依分類或備註搜尋交易 / Search transactions by category or note
 - 依日期範圍篩選交易 / Filter transactions by date range
+- 月份統計 / Monthly statistics
+- 分類統計 / Category statistics
 - 顯示總收入、總支出與餘額 / Display total income, total expense, and balance
 - 啟動時自動建立 SQLite 資料庫與預設分類 / Automatically create the SQLite database and default categories on startup
 
@@ -168,7 +170,6 @@ Amounts are stored as integers in whole currency units. Floating-point values ar
 
 The current module boundaries can be extended with:
 
-- 統計圖表 / Statistics and charts
 - 預算管理 / Budget management
 - Excel 匯出 / Excel export
 - 資料庫備份與還原 / Database backup and restore
