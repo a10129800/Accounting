@@ -1,5 +1,5 @@
 # My Accounting App
-
+![](https://github.com/a10129800/Accounting/blob/master/img/2026-08-29%2017%2047%2059.png)
 一個使用 Python、PySide6、SQLAlchemy 與 SQLite 建立的簡易桌面記帳軟體。
 
 A simple desktop accounting application built with Python, PySide6, SQLAlchemy, and SQLite.
