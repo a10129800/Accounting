@@ -6,20 +6,25 @@ A simple desktop accounting application built with Python, PySide6, SQLAlchemy, 
 
 ## Features / 功能
 
-- 新增收入與支出 / Add income and expense transactions (8/28)
-- 編輯交易 / Edit transactions (8/28)
-- 刪除交易 / Delete transactions (8/28)
-- 記錄日期與備註 / Record transaction date and notes (8/28)
-- 顯示交易紀錄 / Display transaction history (8/28)
-- 依分類或備註搜尋交易 / Search transactions by category or note (8/28)
-- 依日期範圍篩選交易 / Filter transactions by date range (8/28)
-- 顯示總收入、總支出與餘額 / Display total income, total expense, and balance (8/28)
-- 啟動時自動建立 SQLite 資料庫與預設分類 / Automatically create the SQLite database and default categories on startup (8/28)
-- 新增自訂分類 / Add custom categories (8/29)
-- 編輯分類 / Edit categories (8/29)
-- 刪除未使用的分類 / Delete unused categories (8/29)
-- 月份統計 / Monthly statistics (8/30)
-- 分類統計 / Category statistics (8/30)
+**8/28**
+- 新增收入與支出 / Add income and expense transactions
+- 編輯交易 / Edit transactions
+- 刪除交易 / Delete transactions
+- 記錄日期與備註 / Record transaction date and notes
+- 顯示交易紀錄 / Display transaction history
+- 依分類或備註搜尋交易 / Search transactions by category or note
+- 依日期範圍篩選交易 / Filter transactions by date range
+- 顯示總收入、總支出與餘額 / Display total income, total expense, and balance
+- 啟動時自動建立 SQLite 資料庫與預設分類 / Automatically create the SQLite database and default categories on startup
+
+**8/29**
+- 新增自訂分類 / Add custom categories
+- 編輯分類 / Edit categories
+- 刪除未使用的分類 / Delete unused categories
+
+**8/30**
+- 月份統計 / Monthly statistics
+- 分類統計 / Category statistics
 
 ## Requirements / 系統需求
 
