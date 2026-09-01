@@ -1,4 +1,5 @@
-from datetime import date
+from datetime import date, datetime
+from pathlib import Path
 
 from PySide6.QtWidgets import (
     QHBoxLayout,
@@ -10,6 +11,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QVBoxLayout,
     QWidget,
+    QFileDialog,
 )
 
 from .services import AccountingService, ValidationError
@@ -17,6 +19,7 @@ from .transaction_dialog import TransactionDialog
 from .transaction_table import TransactionTable
 from .category_manager_dialog import CategoryManagerDialog
 from .statistics_dialog import StatisticsDialog
+from .exporters import ExcelExporter
 
 
 class MainWindow(QMainWindow):
@@ -64,12 +67,14 @@ class MainWindow(QMainWindow):
         delete_button = QPushButton("刪除")
         category_button = QPushButton("分類管理")
         statistics_button = QPushButton("統計")
+        export_button = QPushButton("匯出 Excel")
         income_button.clicked.connect(lambda: self.add_transaction("income"))
         expense_button.clicked.connect(lambda: self.add_transaction("expense"))
         edit_button.clicked.connect(self.edit_transaction)
         delete_button.clicked.connect(self.delete_transaction)
         category_button.clicked.connect(self.manage_categories)
         statistics_button.clicked.connect(self.show_statistics)
+        export_button.clicked.connect(self.export_to_excel)
 
         action_layout = QHBoxLayout()
         action_layout.addWidget(income_button)
@@ -78,6 +83,7 @@ class MainWindow(QMainWindow):
         action_layout.addWidget(delete_button)
         action_layout.addWidget(category_button)
         action_layout.addWidget(statistics_button)
+        action_layout.addWidget(export_button)
 
         layout = QVBoxLayout()
         layout.addLayout(summary_layout)
@@ -152,3 +158,51 @@ class MainWindow(QMainWindow):
     def show_statistics(self) -> None:
         dialog = StatisticsDialog(self.service, self)
         dialog.exec()
+
+    def export_to_excel(self) -> None:
+        """Export current transactions to Excel file."""
+        # Get current filter values
+        keyword = self.search_input.text().strip()
+        start_date = self.start_date_input.date().toPython()
+        end_date = self.end_date_input.date().toPython()
+        
+        # Get filtered transactions and summary
+        transactions = self.service.list_transactions(keyword, start_date, end_date)
+        total_income, total_expense, _ = self.service.get_summary(
+            keyword, start_date, end_date
+        )
+        
+        if not transactions:
+            QMessageBox.information(self, "提示", "沒有交易記錄可匯出")
+            return
+        
+        # Ask user for file location
+        default_filename = f"交易紀錄_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "匯出為 Excel",
+            str(Path.home() / "Desktop" / default_filename),
+            "Excel 檔案 (*.xlsx)",
+        )
+        
+        if not file_path:
+            return
+        
+        # Export
+        exporter = ExcelExporter(file_path)
+        title = f"交易紀錄 ({start_date} ~ {end_date})"
+        if keyword:
+            title += f" [搜尋: {keyword}]"
+        
+        success = exporter.export_transactions(
+            transactions, total_income, total_expense, title
+        )
+        
+        if success:
+            QMessageBox.information(
+                self,
+                "匯出成功",
+                f"已匯出 {len(transactions)} 筆交易到:\n{file_path}",
+            )
+        else:
+            QMessageBox.warning(self, "匯出失敗", "匯出過程中發生錯誤")
