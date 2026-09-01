@@ -24,7 +24,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.service = service
         self.setWindowTitle("簡易記帳")
-        self.resize(800, 520)
+        self.resize(1000, 600)
 
         self.income_label = QLabel()
         self.expense_label = QLabel()
@@ -56,6 +56,7 @@ class MainWindow(QMainWindow):
         filter_layout.addWidget(clear_filter_button)
 
         self.table = TransactionTable()
+        self.table.horizontalHeader().setDefaultSectionSize(120)
 
         income_button = QPushButton("新增收入")
         expense_button = QPushButton("新增支出")

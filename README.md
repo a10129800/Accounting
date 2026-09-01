@@ -26,6 +26,12 @@ A simple desktop accounting application built with Python, PySide6, SQLAlchemy, 
 - 月份統計 / Monthly statistics
 - 分類統計 / Category statistics
 
+**9/1**
+- UI 美化與最佳化 / UI improvements and optimization
+  - 交易表格顏色編碼（收入綠色、支出紅色）/ Color-coded transaction amounts
+  - 統計表格視覺優化（數字右對齊、合計行粗體顯示）/ Enhanced statistics tables with alignment and totals
+  - 主窗口尺寸調整（1000×600）/ Optimized window size
+
 ## Requirements / 系統需求
 
 - Python 3.12 or newer / Python 3.12 或更新版本

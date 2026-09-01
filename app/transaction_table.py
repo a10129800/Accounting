@@ -1,4 +1,5 @@
 from PySide6.QtCore import QAbstractTableModel, QModelIndex, Qt
+from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QTableView
 
 from .models import Transaction
@@ -30,17 +31,24 @@ class TransactionTableModel(QAbstractTableModel):
     def data(self, index: QModelIndex, role: int = Qt.ItemDataRole.DisplayRole):
         if not index.isValid() or not (transaction := self.transaction_at(index.row())):
             return None
-        if role != Qt.ItemDataRole.DisplayRole:
-            return None
 
-        values = [
-            transaction.transaction_date.isoformat(),
-            "收入" if transaction.type == "income" else "支出",
-            transaction.category.name,
-            f"{transaction.amount:,}",
-            transaction.note,
-        ]
-        return values[index.column()]
+        # Display role for text content
+        if role == Qt.ItemDataRole.DisplayRole:
+            values = [
+                transaction.transaction_date.isoformat(),
+                "收入" if transaction.type == "income" else "支出",
+                transaction.category.name,
+                f"{transaction.amount:,}",
+                transaction.note,
+            ]
+            return values[index.column()]
+        
+        # Foreground role for text color
+        if role == Qt.ItemDataRole.ForegroundRole:
+            if index.column() == 3:  # Amount column
+                return Qt.GlobalColor.green if transaction.type == "income" else Qt.GlobalColor.red
+        
+        return None
 
     def headerData(self, section: int, orientation: Qt.Orientation, role: int = Qt.ItemDataRole.DisplayRole):
         if role == Qt.ItemDataRole.DisplayRole and orientation == Qt.Orientation.Horizontal:
