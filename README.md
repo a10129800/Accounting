@@ -35,10 +35,16 @@ A simple desktop accounting application built with Python, PySide6, SQLAlchemy, 
   - 按當前篩選結果匯出交易記錄 / Export transactions based on current filters
   - 包含統計摘要（收入、支出、結餘）/ Includes summary statistics
 
+**9/4**
+- 資料庫備份 / Database backup
+- 資料庫還原 / Database restore
+- 還原前驗證 SQLite 完整性 / Validate SQLite integrity before restore
+
 ## Requirements / 系統需求
 
 - Python 3.12 or newer / Python 3.12 或更新版本
 - Windows, macOS, or Linux / Windows、macOS 或 Linux
+- openpyxl / Excel 匯出所需套件
 
 ## Installation / 安裝
 
@@ -102,6 +108,7 @@ The tests cover:
 - 刪除交易 / Deleting transactions
 - 總收入、總支出與餘額 / Income, expense, and balance calculations
 - 收入分類與支出分類驗證 / Matching transaction types with categories
+- 月份與分類統計 / Monthly and category statistics
 
 ## Project Structure / 專案結構
 
@@ -114,6 +121,8 @@ MyAccountingApp/
 │   ├── models.py               # Category、Transaction / Data models
 │   ├── repositories.py         # 資料存取 / Data access
 │   ├── services.py             # 驗證與商業邏輯 / Validation and business logic
+│   ├── backup.py               # 資料庫備份與還原 / Database backup and restore
+│   ├── exporters.py            # Excel 匯出 / Excel export
 │   ├── main_window.py          # 主視窗 / Main window
 │   ├── transaction_dialog.py   # 新增與編輯視窗 / Create and edit dialog
 │   └── transaction_table.py    # 交易列表 / Transaction table
@@ -137,6 +146,8 @@ The project uses a simple layered design:
 - `repositories.py` performs database CRUD operations only.
 - `models.py` defines the SQLAlchemy ORM models.
 - `database.py` configures SQLite, SQLAlchemy, sessions, and default categories.
+- `backup.py` creates and restores consistent SQLite database backups.
+- `exporters.py` generates formatted Excel exports with summaries.
 
 ## Default Categories / 預設分類
 

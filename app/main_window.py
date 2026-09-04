@@ -14,6 +14,8 @@ from PySide6.QtWidgets import (
     QFileDialog,
 )
 
+from .backup import BackupError, backup_database, restore_database
+from .database import engine
 from .services import AccountingService, ValidationError
 from .transaction_dialog import TransactionDialog
 from .transaction_table import TransactionTable
@@ -68,6 +70,8 @@ class MainWindow(QMainWindow):
         category_button = QPushButton("分類管理")
         statistics_button = QPushButton("統計")
         export_button = QPushButton("匯出 Excel")
+        backup_button = QPushButton("備份資料")
+        restore_button = QPushButton("還原資料")
         income_button.clicked.connect(lambda: self.add_transaction("income"))
         expense_button.clicked.connect(lambda: self.add_transaction("expense"))
         edit_button.clicked.connect(self.edit_transaction)
@@ -75,6 +79,8 @@ class MainWindow(QMainWindow):
         category_button.clicked.connect(self.manage_categories)
         statistics_button.clicked.connect(self.show_statistics)
         export_button.clicked.connect(self.export_to_excel)
+        backup_button.clicked.connect(self.backup_database)
+        restore_button.clicked.connect(self.restore_database)
 
         action_layout = QHBoxLayout()
         action_layout.addWidget(income_button)
@@ -84,6 +90,8 @@ class MainWindow(QMainWindow):
         action_layout.addWidget(category_button)
         action_layout.addWidget(statistics_button)
         action_layout.addWidget(export_button)
+        action_layout.addWidget(backup_button)
+        action_layout.addWidget(restore_button)
 
         layout = QVBoxLayout()
         layout.addLayout(summary_layout)
@@ -158,6 +166,53 @@ class MainWindow(QMainWindow):
     def show_statistics(self) -> None:
         dialog = StatisticsDialog(self.service, self)
         dialog.exec()
+
+    def backup_database(self) -> None:
+        default_path = Path.home() / "Desktop" / (
+            f"accounting_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.db"
+        )
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "備份資料庫",
+            str(default_path),
+            "SQLite 資料庫 (*.db)",
+        )
+        if not file_path:
+            return
+
+        try:
+            backup_database(file_path)
+        except BackupError as error:
+            QMessageBox.warning(self, "備份失敗", str(error))
+            return
+        QMessageBox.information(self, "備份成功", f"資料已備份至：\n{file_path}")
+
+    def restore_database(self) -> None:
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "選擇備份檔",
+            str(Path.home() / "Desktop"),
+            "SQLite 資料庫 (*.db);;所有檔案 (*.*)",
+        )
+        if not file_path:
+            return
+
+        answer = QMessageBox.question(
+            self,
+            "確認還原",
+            "還原會覆蓋目前所有資料，確定要繼續嗎？",
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+
+        try:
+            engine.dispose()
+            restore_database(file_path)
+        except BackupError as error:
+            QMessageBox.warning(self, "還原失敗", str(error))
+            return
+        self.refresh()
+        QMessageBox.information(self, "還原成功", "資料庫已成功還原")
 
     def export_to_excel(self) -> None:
         """Export current transactions to Excel file."""
